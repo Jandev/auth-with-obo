@@ -1,6 +1,16 @@
-@IntegratingService_HostAddress = http://localhost:5244
+@IntegratingService_HostAddress = https://localhost:7288
+
+### Login first
+# Please run the `az account get-access-token --resource=api://afad1932-49c8-4e3c-a3a1-cf9543c84d9e --query accessToken --output tsv` first to get an access token.
+# This access token can then be placed in the `IntegratingService_Token` variable.
+# Have not found a way to do a proper login flow with HTTP files yet.
+@IntegratingService_Token = abc
+
+### Request data
 
 GET {{IntegratingService_HostAddress}}/weatherforecast/
+Authorization: Bearer {{IntegratingService_Token}}
 Accept: application/json
+Accept-Language: en-US,en;q=0.5
 
 ###
