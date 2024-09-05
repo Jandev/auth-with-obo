@@ -6,9 +6,33 @@
 # Have not found a way to do a proper login flow with HTTP files yet.
 @BackendService_Token = eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ikg5bmo1QU9Tc3dNcGhnMVNGeDdqYVYtbEI5dyJ9.eyJhdWQiOiI4ZWJiZWEwNi1mMDFlLTRmOTQtODI1NC0zMmRhMmU5NGMyNDAiLCJpc3MiOiJodHRwczovL2xvZ2luLm1pY3Jvc29mdG9ubGluZS5jb20vNGIxZmEwZjMtODYyYi00OTUxLWEzYTgtZGYxYzcyOTM1Yzc5L3YyLjAiLCJpYXQiOjE3MjU1Mzc1MjgsIm5iZiI6MTcyNTUzNzUyOCwiZXhwIjoxNzI1NTQxOTIyLCJhaW8iOiJBV1FBbS84WEFBQUF3MXByWHp0MjJYb3BoTElqSE5Pamx2N0x3bjV0cFNYSGt1c1VXT0gzLy81TTlrY29EQmRmV3RlMlhscUszc281S1hzOUdFenhib1QzV1hsNSttZVZZLzJWOEFWdFRnekVmb2o0RENOZVA1U3h1TlExY1cwWWFlZ3ZSd2tiVDN5TyIsImF6cCI6IjA0YjA3Nzk1LThkZGItNDYxYS1iYmVlLTAyZjllMWJmN2I0NiIsImF6cGFjciI6IjAiLCJuYW1lIjoiSmFuIGRlIFZyaWVzIiwib2lkIjoiYmY2YzNjMTAtNWFhZC00Y2Q4LWI1NGMtZjkwODM5MjVlN2UzIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiamFuQGphbi12Lm5sIiwicmgiOiIwLkFUQUE4NkFmU3l1R1VVbWpxTjhjY3BOY2VRYnF1NDRlOEpSUGdsUXkyaTZVd2tBd0FHby4iLCJzY3AiOiJCYWNrZW5kRGVmYXVsdCIsInN1YiI6Ik1pVnlBaVUwUTlCN2NhU3B5Q3Z2Z2U2M0g2T2h2ZTJoRUQxNU5tRmZ4MXMiLCJ0aWQiOiI0YjFmYTBmMy04NjJiLTQ5NTEtYTNhOC1kZjFjNzI5MzVjNzkiLCJ1dGkiOiJTTjVrYWp3TDZVQ0tNUVQtOS1FbkFBIiwidmVyIjoiMi4wIn0.Yr4rLbJT20DddZ6M0bWX0NosXLmxcySFuAvCmFfYuItffP5wo_pw20gKXElyM_ddDqXbh8xA7uyFvfi4BerEIwZjGd1_ch9tt2c24Udr60Uwyc8t1_Gj99eSBbmrd5OjZPKvtmQd5iWhFaJK1ktGLpEsAzSVaR3TEpPAtq7cLQ4ehv-0kf30w95y_rkW-hgVHBGY3bAzpg_IBloXbEUm8PYIkoJUMfj8OEX4NxY31OLLTARpf0au7oXBnMDQVll2JtyYV_hISqvTlXFDD2Z1oI4cafZ9tYg4v-KA-xdVrBxqqNJ63Bv-w5ROVLc0RyRyJf956JsQ0cIvxANbt_wrMw
 
+### Invoke endpoint with BackendDefault scope requirement. This is assigned to the Azure CLI in the Authorized Applications list.
 GET {{BackendService_HostAddress}}/weatherforecast/
 Authorization: Bearer {{BackendService_Token}}
 Accept: application/json
 Accept-Language: en-US,en;q=0.5
 
-###
+### Invoke endpoint with Admin role requirement.
+GET {{BackendService_HostAddress}}/AdminRole/
+Authorization: Bearer {{BackendService_Token}}
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+
+### Invoke endpoint with User role requirement.
+GET {{BackendService_HostAddress}}/UserRole/
+Authorization: Bearer {{BackendService_Token}}
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+
+
+### Invoke endpoint with WeatherAdmin scope requirement.
+GET {{BackendService_HostAddress}}/WeatherAdmin/
+Authorization: Bearer {{BackendService_Token}}
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+
+### Invoke endpoint with WeatherUser scope requirement.
+GET {{BackendService_HostAddress}}/WeatherUser/
+Authorization: Bearer {{BackendService_Token}}
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
