@@ -14,10 +14,13 @@ namespace IntegratingService.Controllers
 	[RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
 	public class AllTheDataController : ControllerBase
 	{
+		const string WeatherAdminScope = "WeatherAdmin";
+		const string WeatherUserScope = "WeatherUser";
+
 		private readonly GraphServiceClient _graphServiceClient;
 		private readonly IHttpClientFactory clientFactory;
 		private readonly IConfiguration configuration;
-		
+
 		private readonly ILogger<AllTheDataController> _logger;
 
 		public AllTheDataController(
@@ -33,11 +36,73 @@ namespace IntegratingService.Controllers
 			this.configuration = configuration;
 		}
 
-		[HttpGet(Name = "GetWeatherForecast")]
+		[HttpGet("WeatherForecast", Name = "GetWeatherForecast")]
 		public async Task<ApiResponse> Get()
 		{
 			var username = await GetUserName();
-			var backendDetails = await GetBackendDetails();
+
+			var accessToken = await GenerateAccessToken();
+			var backendDetails = await GetBackendDetails(accessToken);
+
+			var integrationServiceDetails = new IntegrationServiceCallDetails(
+				HttpContext.Request.Headers.Authorization.First()!,
+				username);
+
+			return new ApiResponse(integrationServiceDetails, backendDetails);
+		}
+
+		[HttpGet("WeatherForecastWithUserRole", Name = "GetWeatherForecastWithUserRole")]
+		public async Task<ApiResponse> GetWithUserRole()
+		{
+			var username = await GetUserName();
+
+			var accessToken = await GenerateAccessToken();
+			var backendDetails = await GetBackendDetails(accessToken);
+
+			var integrationServiceDetails = new IntegrationServiceCallDetails(
+				HttpContext.Request.Headers.Authorization.First()!,
+				username);
+
+			return new ApiResponse(integrationServiceDetails, backendDetails);
+		}
+
+		[HttpGet("WeatherForecastWithAdminRole", Name = "GetWeatherForecastWithAdminRole")]
+		public async Task<ApiResponse> GetWithAdminRole()
+		{
+			var username = await GetUserName();
+
+			var accessToken = await GenerateAccessToken();
+			var backendDetails = await GetBackendDetails(accessToken);
+
+			var integrationServiceDetails = new IntegrationServiceCallDetails(
+				HttpContext.Request.Headers.Authorization.First()!,
+				username);
+
+			return new ApiResponse(integrationServiceDetails, backendDetails);
+		}
+
+		[HttpGet("WeatherForecastWithWeatherUserScope", Name = "GetWeatherForecastWithWeatherUserScope")]
+		public async Task<ApiResponse> GetWithUserScope()
+		{
+			var username = await GetUserName();
+
+			var accessToken = await GenerateAccessToken(WeatherAdminScope);
+			var backendDetails = await GetBackendDetails(accessToken);
+
+			var integrationServiceDetails = new IntegrationServiceCallDetails(
+				HttpContext.Request.Headers.Authorization.First()!,
+				username);
+
+			return new ApiResponse(integrationServiceDetails, backendDetails);
+		}
+
+		[HttpGet("WeatherForecastWithWeatherAdminScope", Name = "GetWeatherForecastWithWeatherAdminScope")]
+		public async Task<ApiResponse> GetWithAdminScope()
+		{
+			var username = await GetUserName();
+
+			var accessToken = await GenerateAccessToken(WeatherUserScope);
+			var backendDetails = await GetBackendDetails(accessToken);
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -52,11 +117,9 @@ namespace IntegratingService.Controllers
 			return user.DisplayName;
 		}
 
-		private async Task<BackendApiCallDetails> GetBackendDetails()
+		private async Task<BackendApiCallDetails> GetBackendDetails(string accessToken)
 		{
-			string backendApiBaseUrl = this.configuration["BackendService:BaseUrl"];
-
-			var accessToken = await GenerateAccessToken();
+			string backendApiBaseUrl = this.configuration["BackendService:BaseUrl"] ?? throw new InvalidOperationException("BackendService:BaseUrl is not configured.");
 
 			var httpClient = this.clientFactory.CreateClient();
 			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -67,19 +130,26 @@ namespace IntegratingService.Controllers
 				accessToken,
 				body,
 				(int)response.StatusCode,
-				response.ReasonPhrase);
+				response.ReasonPhrase ?? "No reason provided");
 
 			return callDetails;
 		}
 
 		private async Task<string> GenerateAccessToken()
 		{
-			string applicationIdUri = this.configuration["BackendService:ApplicationIdUri"];
+			return await GenerateAccessToken(string.Empty);
+		}
+
+		private async Task<string> GenerateAccessToken(string requestedScope)
+		{
+			string applicationIdUri = this.configuration["BackendService:ApplicationIdUri"] ?? throw new InvalidOperationException("BackendService:ApplicationIdUri is not configured.");
 			var tenantId = this.configuration["AzureAd:TenantId"];
+
+			string scopeToRequest = string.IsNullOrEmpty(requestedScope) ? applicationIdUri + "/.default" : applicationIdUri + requestedScope;
 
 			var tokenCredential = new DefaultAzureCredential();
 			var accessToken = await tokenCredential.GetTokenAsync(
-				new TokenRequestContext(scopes: new string[] { applicationIdUri + "/.default" }) { }
+				new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
 			);
 
 			return accessToken.Token;

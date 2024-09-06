@@ -28,7 +28,7 @@ namespace BackendService.Controllers
 		// Authorization via Application Scopes
 		///////////////////////////////
 
-		[HttpGet(Name = "GetWeatherForecast")]
+		[HttpGet("Default", Name = "GetWeatherForecast")]
 		[RequiredScope("BackendDefault")]
 		public async Task<IEnumerable<WeatherForecast>> Get()
 		{
@@ -42,7 +42,7 @@ namespace BackendService.Controllers
 			.ToArray();
 		}
 
-		[HttpGet(Name = "GetWithUserScope")]
+		[HttpGet("WithUserScope", Name = "GetWithUserScope")]
 		[RequiredScope("WeatherUser")]
 		public async Task<IEnumerable<WeatherForecast>> GetWeatherUser()
 		{
@@ -56,7 +56,7 @@ namespace BackendService.Controllers
 			.ToArray();
 		}
 
-		[HttpGet(Name = "GetWithAdminScope")]
+		[HttpGet("WithAdminScope", Name = "GetWithAdminScope")]
 		[RequiredScope("WeatherAdmin")]
 		public async Task<IEnumerable<WeatherForecast>> GetWeatherAdmin()
 		{
@@ -74,8 +74,7 @@ namespace BackendService.Controllers
 		// Authorization via Application Roles
 		///////////////////////////////
 
-
-		[HttpGet(Name = "GetWithAdminRole")]
+		[HttpGet("WithAdminRole", Name = "GetWithAdminRole")]
 		[Authorize(Roles = "Admin")]
 		public async Task<IEnumerable<WeatherForecast>> GetAdminRole()
 		{
@@ -89,7 +88,7 @@ namespace BackendService.Controllers
 			.ToArray();
 		}
 
-		[HttpGet(Name = "GetWithUserRole")]
+		[HttpGet("WithUserRole", Name = "GetWithUserRole")]
 		[Authorize(Roles = "User")]
 		public async Task<IEnumerable<WeatherForecast>> GetUserRole()
 		{
