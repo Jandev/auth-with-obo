@@ -27,11 +27,11 @@ jobs:
       working-directory: src/auth-with-obo
 
     - name: Build BackendService
-      run: dotnet build --configuration Release --project BackendService/BackendService.csproj
+      run: dotnet build --configuration Release BackendService/BackendService.csproj
       working-directory: src/auth-with-obo
 
     - name: Build IntegratingService
-      run: dotnet build --configuration Release --project IntegratingService/IntegratingService.csproj
+      run: dotnet build --configuration Release IntegratingService/IntegratingService.csproj
       working-directory: src/auth-with-obo
 
     - name: Publish BackendService
