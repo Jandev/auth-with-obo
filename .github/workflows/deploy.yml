@@ -24,23 +24,23 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
-      working-directory: src
+      working-directory: src/auth-with-obo
 
     - name: Build BackendService
       run: dotnet build --configuration Release --project BackendService/BackendService.csproj
-      working-directory: src
+      working-directory: src/auth-with-obo
 
     - name: Build IntegratingService
       run: dotnet build --configuration Release --project IntegratingService/IntegratingService.csproj
-      working-directory: src
+      working-directory: src/auth-with-obo
 
     - name: Publish BackendService
       run: dotnet publish --configuration Release --output ./publish/BackendService BackendService/BackendService.csproj
-      working-directory: src
+      working-directory: src/auth-with-obo
 
     - name: Publish IntegratingService
       run: dotnet publish --configuration Release --output ./publish/IntegratingService IntegratingService/IntegratingService.csproj
-      working-directory: src
+      working-directory: src/auth-with-obo
 
     - name: Deploy BackendService to Azure Web App
       uses: azure/webapps-deploy@v2
@@ -48,7 +48,7 @@ jobs:
         app-name: backendServiceApp
         slot-name: 'production'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
-        package: ./publish/BackendService
+        package: src/auth-with-obo/publish/BackendService
 
     - name: Deploy IntegratingService to Azure Web App
       uses: azure/webapps-deploy@v2
@@ -56,4 +56,4 @@ jobs:
         app-name: integratingServiceApp
         slot-name: 'production'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_INTEGRATING }}
-        package: ./publish/IntegratingService
+        package: src/auth-with-obo/publish/IntegratingService
