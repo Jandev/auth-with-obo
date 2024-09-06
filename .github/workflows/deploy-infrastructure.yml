@@ -1,0 +1,33 @@
+name: Deploy Bicep
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'deployment/**'
+  workflow_dispatch:
+
+jobs:
+  deploy-bicep:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Azure CLI
+      uses: azure/CLI@v1
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy Bicep file
+      run: |
+        az deployment group create \
+          --resource-group auth-with-obo \
+          --template-file deployment/main.bicep \
+          --parameters @deployment/parameters.json
+
