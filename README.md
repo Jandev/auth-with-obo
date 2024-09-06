@@ -18,6 +18,46 @@ This solution contains multiple projects:
 GET http://localhost:8080/get-my-data
 ```
 
+## Tests
+
+While implementing the solution, continuous testing is in place. Results are shared in this section.
+
+### BackendService
+
+#### Admin role and WeatherUser scope
+
+With the contents in the bearer token, we see functionality (authorization) is working as expected.
+
+```json
+{
+  "typ": "JWT",
+  "alg": "RS256",
+  "kid": "H9nj5AOSswMphg1SFx7jaV-lB9w"
+}.{
+  "aud": "8ebbea06-f01e-4f94-8254-32da2e94c240",
+  "iss": "https://login.microsoftonline.com/4b1fa0f3-862b-4951-a3a8-df1c72935c79/v2.0",
+  "iat": 1725622279,
+  "nbf": 1725622279,
+  "exp": 1725627509,
+  "aio": "AXQAi/8XAAAA/bEntSNEIXjGJrqs9nbb6HjiuPAp/p+FYSIJDgUShpt52nHCvU3opUwMe2MjvRjGK970a3eWWMxQPcK6merohVFPhbFsu72mGRouKE1+QGIWkxW5xjivCnJTkENx2HSoEJh9NsQI+HpJaTpN3/65Tg==",
+  "azp": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
+  "azpacr": "0",
+  "name": "Jan de Vries",
+  "oid": "bf6c3c10-5aad-4cd8-b54c-f9083925e7e3",
+  "preferred_username": "jan@jan-v.nl",
+  "rh": "0.ATAA86AfSyuGUUmjqN8ccpNceQbqu44e8JRPglQy2i6UwkAwAGo.",
+  "roles": [
+    "Admin"
+  ],
+  "scp": "BackendDefault WeatherUser",
+  "sub": "MiVyAiU0Q9B7caSpyCvvge63H6Ohve2hED15NmFfx1s",
+  "tid": "4b1fa0f3-862b-4951-a3a8-df1c72935c79",
+  "uti": "zqIiAA_oSEC3T1wZvLoKAA",
+  "ver": "2.0"
+}.[Signature]
+```
+
+![Results of the HTTP calls to the endpoins using an Admin Application Role and a WeatherUser scope. The endpoints show a green checkmark for those who succeeded and a red cross who didn't.](./docs/media/backendservice-admin-role-weatheruser-scope-http-results.png)
 
 ## Errors seen
 
