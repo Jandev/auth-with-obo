@@ -24,18 +24,23 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: src
 
     - name: Build BackendService
       run: dotnet build --configuration Release --project BackendService/BackendService.csproj
+      working-directory: src
 
     - name: Build IntegratingService
       run: dotnet build --configuration Release --project IntegratingService/IntegratingService.csproj
+      working-directory: src
 
     - name: Publish BackendService
       run: dotnet publish --configuration Release --output ./publish/BackendService BackendService/BackendService.csproj
+      working-directory: src
 
     - name: Publish IntegratingService
       run: dotnet publish --configuration Release --output ./publish/IntegratingService IntegratingService/IntegratingService.csproj
+      working-directory: src
 
     - name: Deploy BackendService to Azure Web App
       uses: azure/webapps-deploy@v2
