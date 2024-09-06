@@ -1,5 +1,5 @@
 @description('The location of the resource group')
-param location string = 'West Europe'
+param location string = 'North Europe'
 
 @description('The name of the BackendService App Service Plan')
 param backendServicePlanName string = 'backendServicePlan'
