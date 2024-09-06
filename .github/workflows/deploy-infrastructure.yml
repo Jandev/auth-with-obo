@@ -30,5 +30,4 @@ jobs:
       run: |
         az deployment group create \
           --resource-group auth-with-obo \
-          --template-file deployment/main.bicep \
-          --parameters @deployment/parameters.json
+          --template-file deployment/main.bicep
