@@ -46,6 +46,52 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
     serverFarmId: backendServicePlan.id
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|8.0'
+      appSettings: [
+        {
+          name: 'AzureAd__Instance'
+          value: 'https://login.microsoftonline.com/'
+        }
+        {
+          name: 'AzureAd__Domain'
+          value: 'jan-v.nl'
+        }
+        {
+          name: 'AzureAd__TenantId'
+          value: '4b1fa0f3-862b-4951-a3a8-df1c72935c79'
+        }
+        {
+          name: 'AzureAd__ClientId'
+          value: '8ebbea06-f01e-4f94-8254-32da2e94c240'
+        }
+        {
+          name: 'AzureAd__CallbackPath'
+          value: '/signin-oidc'
+        }
+        {
+          name: 'AzureAd__Scopes'
+          value: 'BackendDefault'
+        }
+        {
+          name: 'Logging__LogLevel__Default'
+          value: 'Information'
+        }
+        {
+          name: 'Logging__LogLevel__Microsoft.AspNetCore'
+          value: 'Warning'
+        }
+        {
+          name: 'AllowedHosts'
+          value: '*'
+        }
+        {
+          name: 'MicrosoftGraph__BaseUrl'
+          value: 'https://graph.microsoft.com/v1.0'
+        }
+        {
+          name: 'MicrosoftGraph__Scopes'
+          value: 'user.read'
+        }
+      ]
     }
   }
 }
@@ -57,6 +103,68 @@ resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
     serverFarmId: integratingServicePlan.id
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|8.0'
+      appSettings: [
+        {
+          name: 'AzureAd__Instance'
+          value: 'https://login.microsoftonline.com/'
+        }
+        {
+          name: 'AzureAd__Domain'
+          value: 'jan-v.nl'
+        }
+        {
+          name: 'AzureAd__TenantId'
+          value: '4b1fa0f3-862b-4951-a3a8-df1c72935c79'
+        }
+        {
+          name: 'AzureAd__ClientId'
+          value: 'afad1932-49c8-4e3c-a3a1-cf9543c84d9e'
+        }
+        {
+          name: 'AzureAd__CallbackPath'
+          value: '/signin-oidc'
+        }
+        {
+          name: 'AzureAd__Scopes'
+          value: 'CustomDefault'
+        }
+        {
+          name: 'AzureAd__ClientSecret'
+          value: 'Client secret from app-registration. Check user secrets/azure portal.'
+        }
+        {
+          name: 'AzureAd__ClientCertificates'
+          value: '[]'
+        }
+        {
+          name: 'Logging__LogLevel__Default'
+          value: 'Information'
+        }
+        {
+          name: 'Logging__LogLevel__Microsoft.AspNetCore'
+          value: 'Warning'
+        }
+        {
+          name: 'AllowedHosts'
+          value: '*'
+        }
+        {
+          name: 'MicrosoftGraph__BaseUrl'
+          value: 'https://graph.microsoft.com/v1.0'
+        }
+        {
+          name: 'MicrosoftGraph__Scopes'
+          value: 'user.read'
+        }
+        {
+          name: 'BackendService__BaseUrl'
+          value: 'https://backendserviceapp.azurewebsites.net'
+        }
+        {
+          name: 'BackendService__ApplicationIdUri'
+          value: 'api://8ebbea06-f01e-4f94-8254-32da2e94c240'
+        }
+      ]
     }
   }
 }

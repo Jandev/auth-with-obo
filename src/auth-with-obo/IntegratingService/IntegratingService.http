@@ -1,4 +1,5 @@
-@IntegratingService_HostAddress = https://localhost:7288
+#@IntegratingService_HostAddress = https://localhost:7288
+@IntegratingService_HostAddress = https://integratingserviceapp.azurewebsites.net
 
 ### Login first
 # Please run the `az account get-access-token --resource=api://afad1932-49c8-4e3c-a3a1-cf9543c84d9e --query accessToken --output tsv` first to get an access token.
