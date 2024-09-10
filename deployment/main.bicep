@@ -16,6 +16,9 @@ param integratingServiceAppName string = 'integratingServiceApp'
 @description('The name of the Log Analytics Workspace')
 param logAnalyticsWorkspaceName string = 'logAnalyticsWorkspace'
 
+@description('The name of the Application Insights resource')
+param appInsightsName string = 'appInsights'
+
 resource backendServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: backendServicePlanName
   location: location
@@ -50,6 +53,16 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06
       name: 'PerGB2018'
     }
     retentionInDays: 30
+  }
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: appInsightsName
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalyticsWorkspace.id
   }
 }
 
@@ -123,7 +136,7 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: logAnalyticsWorkspace.properties.customerId
+          value: appInsights.properties.InstrumentationKey
         }
       ]
     }
@@ -206,7 +219,7 @@ resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: logAnalyticsWorkspace.properties.customerId
+          value: appInsights.properties.InstrumentationKey
         }
       ]
     }
@@ -218,5 +231,6 @@ output integratingServicePlanId string = integratingServicePlan.id
 output backendServiceAppId string = backendServiceApp.id
 output integratingServiceAppId string = integratingServiceApp.id
 output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
+output appInsightsId string = appInsights.id
 output backendServiceIdentityId string = backendServiceIdentity.id
 output integratingServiceIdentityId string = integratingServiceIdentity.id
