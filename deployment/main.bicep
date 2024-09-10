@@ -87,6 +87,7 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
   }
   properties: {
     serverFarmId: backendServicePlan.id
+    httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|8.0'
       appSettings: [
@@ -166,6 +167,7 @@ resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
   }
   properties: {
     serverFarmId: integratingServicePlan.id
+    httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|8.0'
       appSettings: [
