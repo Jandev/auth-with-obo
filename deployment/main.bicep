@@ -13,6 +13,9 @@ param backendServiceAppName string = 'backendServiceApp'
 @description('The name of the IntegratingService App Service')
 param integratingServiceAppName string = 'integratingServiceApp'
 
+@description('The name of the Log Analytics Workspace')
+param logAnalyticsWorkspaceName string = 'logAnalyticsWorkspace'
+
 resource backendServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: backendServicePlanName
   location: location
@@ -39,9 +42,36 @@ resource integratingServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
 }
 
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
+  name: logAnalyticsWorkspaceName
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
+}
+
+resource backendServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' = {
+  name: '${backendServiceAppName}-identity'
+  location: location
+}
+
+resource integratingServiceIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-07-31-preview' = {
+  name: '${integratingServiceAppName}-identity'
+  location: location
+}
+
 resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
   name: backendServiceAppName
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${backendServiceIdentity.id}': {}
+    }
+  }
   properties: {
     serverFarmId: backendServicePlan.id
     siteConfig: {
@@ -91,6 +121,10 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
           name: 'MicrosoftGraph__Scopes'
           value: 'user.read'
         }
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: logAnalyticsWorkspace.properties.customerId
+        }
       ]
     }
   }
@@ -99,6 +133,12 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
 resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
   name: integratingServiceAppName
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${integratingServiceIdentity.id}': {}
+    }
+  }
   properties: {
     serverFarmId: integratingServicePlan.id
     siteConfig: {
@@ -164,6 +204,10 @@ resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
           name: 'BackendService__ApplicationIdUri'
           value: 'api://8ebbea06-f01e-4f94-8254-32da2e94c240'
         }
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: logAnalyticsWorkspace.properties.customerId
+        }
       ]
     }
   }
@@ -173,3 +217,6 @@ output backendServicePlanId string = backendServicePlan.id
 output integratingServicePlanId string = integratingServicePlan.id
 output backendServiceAppId string = backendServiceApp.id
 output integratingServiceAppId string = integratingServiceApp.id
+output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
+output backendServiceIdentityId string = backendServiceIdentity.id
+output integratingServiceIdentityId string = integratingServiceIdentity.id
