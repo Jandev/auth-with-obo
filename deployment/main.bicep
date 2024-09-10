@@ -135,8 +135,20 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
           value: 'user.read'
         }
         {
+          name: 'BackendService__BaseUrl'
+          value: 'https://backendserviceapp.azurewebsites.net'
+        }
+        {
+          name: 'BackendService__ApplicationIdUri'
+          value: 'api://8ebbea06-f01e-4f94-8254-32da2e94c240'
+        }
+        {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: appInsights.properties.InstrumentationKey
+        }
+        {
+          name: 'ASPNETCORE_HTTPS_PORT'
+          value: '443'
         }
       ]
     }
@@ -220,6 +232,10 @@ resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: appInsights.properties.InstrumentationKey
+        }
+        {
+          name: 'ASPNETCORE_HTTPS_PORT'
+          value: '443'
         }
       ]
     }
