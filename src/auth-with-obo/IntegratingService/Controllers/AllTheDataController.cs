@@ -167,14 +167,34 @@ namespace IntegratingService.Controllers
 
 			try
 			{
+				string userAssignedClientId = this.configuration["AssignedManagedIdentity"];
+				bool isRunningLocal = !string.IsNullOrEmpty(userAssignedClientId);
+
 				string scopeToRequest = string.IsNullOrEmpty(requestedScope) ? applicationIdUri + "/.default" : applicationIdUri + requestedScope;
+				if (isRunningLocal)
+				{					
+					var tokenCredential = new DefaultAzureCredential();
+					var accessToken = await tokenCredential.GetTokenAsync(
+						new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
+					);
 
-				var tokenCredential = new DefaultAzureCredential();
-				var accessToken = await tokenCredential.GetTokenAsync(
-					new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
-				);
+					return accessToken.Token;
+				}
+				else
+				{
+					
+					var tokenCredential = new DefaultAzureCredential(
+						new DefaultAzureCredentialOptions
+						{
+							ManagedIdentityClientId = userAssignedClientId
+						}
+					);
 
-				return accessToken.Token;
+					var accessToken = await tokenCredential.GetTokenAsync(
+						new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
+					);
+					return accessToken.Token;
+				}
 			}
 			catch (Exception ex)
 			{

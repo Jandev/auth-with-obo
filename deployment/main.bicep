@@ -151,6 +151,10 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
           name: 'ASPNETCORE_HTTPS_PORT'
           value: '443'
         }
+        {
+          name: 'AssignedManagedIdentity'
+          value: backendServiceIdentity.properties.clientId
+        }
       ]
     }
   }
@@ -238,6 +242,10 @@ resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
         {
           name: 'ASPNETCORE_HTTPS_PORT'
           value: '443'
+        }
+        {
+          name: 'AssignedManagedIdentity'
+          value: integratingServiceIdentity.properties.clientId
         }
       ]
     }
