@@ -113,26 +113,46 @@ namespace IntegratingService.Controllers
 
 		private async Task<string> GetUserName()
 		{
-			var user = await _graphServiceClient.Me.Request().GetAsync();
-			return user.DisplayName;
+			try
+			{
+				var user = await _graphServiceClient.Me.Request().GetAsync();
+				return user.DisplayName;
+			}
+			catch(Exception ex)
+			{
+				this._logger.LogError(ex, "Failed to get user details from Graph API.");
+				throw;
+			}
+			
 		}
 
 		private async Task<BackendApiCallDetails> GetBackendDetails(string accessToken)
 		{
 			string backendApiBaseUrl = this.configuration["BackendService:BaseUrl"] ?? throw new InvalidOperationException("BackendService:BaseUrl is not configured.");
+			this._logger.LogInformation("Invoking backend API at `{BackendApiBaseUrl}`.", backendApiBaseUrl);
 
 			var httpClient = this.clientFactory.CreateClient();
 			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+			this._logger.LogInformation("Access token `{AccessToken}` is set in the request header.", accessToken);
+
 			var response = await httpClient.GetAsync(backendApiBaseUrl + "/weatherforecast/");
 			var body = await response.Content.ReadAsStringAsync();
 
-			var callDetails = new BackendApiCallDetails(
-				accessToken,
-				body,
-				(int)response.StatusCode,
-				response.ReasonPhrase ?? "No reason provided");
+			try
+			{
+				var callDetails = new BackendApiCallDetails(
+								accessToken,
+								body,
+								(int)response.StatusCode,
+								response.ReasonPhrase ?? "No reason provided");
 
-			return callDetails;
+				return callDetails;
+			}
+			catch (Exception ex)
+			{
+				this._logger.LogError(ex, "Failed to get response from backend API.");
+				throw;
+			}
 		}
 
 		private async Task<string> GenerateAccessToken()
@@ -145,14 +165,22 @@ namespace IntegratingService.Controllers
 			string applicationIdUri = this.configuration["BackendService:ApplicationIdUri"] ?? throw new InvalidOperationException("BackendService:ApplicationIdUri is not configured.");
 			var tenantId = this.configuration["AzureAd:TenantId"];
 
-			string scopeToRequest = string.IsNullOrEmpty(requestedScope) ? applicationIdUri + "/.default" : applicationIdUri + requestedScope;
+			try
+			{
+				string scopeToRequest = string.IsNullOrEmpty(requestedScope) ? applicationIdUri + "/.default" : applicationIdUri + requestedScope;
 
-			var tokenCredential = new DefaultAzureCredential();
-			var accessToken = await tokenCredential.GetTokenAsync(
-				new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
-			);
+				var tokenCredential = new DefaultAzureCredential();
+				var accessToken = await tokenCredential.GetTokenAsync(
+					new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
+				);
 
-			return accessToken.Token;
+				return accessToken.Token;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Failed to get access token for ApplicationId `{ApplicationId}`, Scope `{Scope}`, TenantId `{TenantId}`.", applicationIdUri, requestedScope, tenantId);
+				throw;
+			}
 		}
 
 		public record BackendApiCallDetails(string AccessToken, string Body, int StatusCode, string Reason);
