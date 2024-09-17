@@ -186,12 +186,8 @@ namespace IntegratingService.Controllers
 				else
 				{
 					_logger.LogInformation("Running in Azure. Using DefaultAzureCredential with Managed Identity `{ManagedIdentityClientId}` to get access token.", userAssignedClientId);
-					var tokenCredential = new DefaultAzureCredential(
-						new DefaultAzureCredentialOptions
-						{
-							ManagedIdentityClientId = userAssignedClientId
-						}
-					);
+
+					var tokenCredential = new ManagedIdentityCredential(userAssignedClientId);
 
 					AccessToken accessToken;
 					if(string.IsNullOrEmpty(requestedScope))
