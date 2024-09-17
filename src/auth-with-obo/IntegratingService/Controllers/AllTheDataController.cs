@@ -190,9 +190,21 @@ namespace IntegratingService.Controllers
 						}
 					);
 
-					var accessToken = await tokenCredential.GetTokenAsync(
-						new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
-					);
+					AccessToken accessToken;
+					if(string.IsNullOrEmpty(requestedScope))
+					{
+						accessToken = await tokenCredential.GetTokenAsync(
+							new TokenRequestContext() { }
+						);
+					}
+					else
+					{
+						accessToken = await tokenCredential.GetTokenAsync(
+							new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
+						);
+					}
+
+					
 					return accessToken.Token;
 				}
 			}
