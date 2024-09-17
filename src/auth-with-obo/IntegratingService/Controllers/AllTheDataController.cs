@@ -116,6 +116,8 @@ namespace IntegratingService.Controllers
 			try
 			{
 				var user = await _graphServiceClient.Me.Request().GetAsync();
+
+				_logger.LogInformation("User `{User}` is fetched from Graph API.", user.DisplayName);
 				return user.DisplayName;
 			}
 			catch(Exception ex)
@@ -165,14 +167,15 @@ namespace IntegratingService.Controllers
 			string applicationIdUri = this.configuration["BackendService:ApplicationIdUri"] ?? throw new InvalidOperationException("BackendService:ApplicationIdUri is not configured.");
 			var tenantId = this.configuration["AzureAd:TenantId"];
 
+			string userAssignedClientId = this.configuration["AssignedManagedIdentity"];
 			try
-			{
-				string userAssignedClientId = this.configuration["AssignedManagedIdentity"];
+			{				
 				bool isRunningLocal = !string.IsNullOrEmpty(userAssignedClientId);
 
 				string scopeToRequest = string.IsNullOrEmpty(requestedScope) ? applicationIdUri + "/.default" : applicationIdUri + requestedScope;
 				if (isRunningLocal)
-				{					
+				{
+					_logger.LogInformation("Running locally. Using DefaultAzureCredential to get access token.");
 					var tokenCredential = new DefaultAzureCredential();
 					var accessToken = await tokenCredential.GetTokenAsync(
 						new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
@@ -182,7 +185,7 @@ namespace IntegratingService.Controllers
 				}
 				else
 				{
-					
+					_logger.LogInformation("Running in Azure. Using DefaultAzureCredential with Managed Identity `{ManagedIdentityClientId}` to get access token.", userAssignedClientId);
 					var tokenCredential = new DefaultAzureCredential(
 						new DefaultAzureCredentialOptions
 						{
@@ -193,12 +196,14 @@ namespace IntegratingService.Controllers
 					AccessToken accessToken;
 					if(string.IsNullOrEmpty(requestedScope))
 					{
+						_logger.LogInformation("Requesting access token for all scopes.");
 						accessToken = await tokenCredential.GetTokenAsync(
 							new TokenRequestContext() { }
 						);
 					}
 					else
 					{
+						_logger.LogInformation("Requesting access token for scope `{Scope}`.", requestedScope);
 						accessToken = await tokenCredential.GetTokenAsync(
 							new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
 						);
@@ -210,7 +215,7 @@ namespace IntegratingService.Controllers
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Failed to get access token for ApplicationId `{ApplicationId}`, Scope `{Scope}`, TenantId `{TenantId}`.", applicationIdUri, requestedScope, tenantId);
+				_logger.LogError(ex, "Failed to get access token for ApplicationId `{ApplicationId}`, Scope `{Scope}`, TenantId `{TenantId}` for identity `{Identity}`.", applicationIdUri, requestedScope, tenantId, userAssignedClientId);
 				throw;
 			}
 		}
