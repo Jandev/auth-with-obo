@@ -42,7 +42,7 @@ namespace IntegratingService.Controllers
 			var username = await GetUserName();
 
 			var accessToken = await GenerateAccessToken();
-			var backendDetails = await GetBackendDetails(accessToken);
+			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/Default/");
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -57,7 +57,7 @@ namespace IntegratingService.Controllers
 			var username = await GetUserName();
 
 			var accessToken = await GenerateAccessToken();
-			var backendDetails = await GetBackendDetails(accessToken);
+			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithUserRole/");
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -72,7 +72,7 @@ namespace IntegratingService.Controllers
 			var username = await GetUserName();
 
 			var accessToken = await GenerateAccessToken();
-			var backendDetails = await GetBackendDetails(accessToken);
+			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithAdminRole/");
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -87,7 +87,7 @@ namespace IntegratingService.Controllers
 			var username = await GetUserName();
 
 			var accessToken = await GenerateAccessToken(WeatherAdminScope);
-			var backendDetails = await GetBackendDetails(accessToken);
+			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithUserScope/");
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -96,13 +96,13 @@ namespace IntegratingService.Controllers
 			return new ApiResponse(integrationServiceDetails, backendDetails);
 		}
 
-		[HttpGet("WeatherForecastWithWeatherAdminScope", Name = "GetWeatherForecastWithWeatherAdminScope")]
+		[HttpGet("WeatherForecastWithWeatherAdminScope", Name = "GetWeatherForecastWithWeatherAdminScope/")]
 		public async Task<ApiResponse> GetWithAdminScope()
 		{
 			var username = await GetUserName();
 
 			var accessToken = await GenerateAccessToken(WeatherUserScope);
-			var backendDetails = await GetBackendDetails(accessToken);
+			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithAdminScope/");
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -128,7 +128,7 @@ namespace IntegratingService.Controllers
 			
 		}
 
-		private async Task<BackendApiCallDetails> GetBackendDetails(string accessToken)
+		private async Task<BackendApiCallDetails> GetBackendDetails(string accessToken, string slug)
 		{
 			string backendApiBaseUrl = this.configuration["BackendService:BaseUrl"] ?? throw new InvalidOperationException("BackendService:BaseUrl is not configured.");
 			this._logger.LogInformation("Invoking backend API at `{BackendApiBaseUrl}`.", backendApiBaseUrl);
@@ -137,7 +137,7 @@ namespace IntegratingService.Controllers
 			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 			this._logger.LogInformation("Access token `{AccessToken}` is set in the request header.", accessToken);
 
-			var response = await httpClient.GetAsync(backendApiBaseUrl + "/weatherforecast/");
+			var response = await httpClient.GetAsync(backendApiBaseUrl + slug);
 			var body = await response.Content.ReadAsStringAsync();
 
 			try
