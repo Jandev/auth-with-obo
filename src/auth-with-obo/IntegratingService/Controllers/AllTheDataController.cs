@@ -186,25 +186,14 @@ namespace IntegratingService.Controllers
 				}
 				else
 				{
-					_logger.LogInformation("Running in Azure. Using DefaultAzureCredential with Managed Identity `{ManagedIdentityClientId}` to get access token.", userAssignedClientId);
+					_logger.LogInformation("Running in Azure. Using ManagedIdentityCredential with Managed Identity `{ManagedIdentityClientId}` to get access token.", userAssignedClientId);
 
 					var tokenCredential = new ManagedIdentityCredential(userAssignedClientId);
 
-					AccessToken accessToken;
-					if(string.IsNullOrEmpty(requestedScope))
-					{
-						_logger.LogInformation("Requesting access token for all scopes.");
-						accessToken = await tokenCredential.GetTokenAsync(
-							new TokenRequestContext() { }
-						);
-					}
-					else
-					{
-						_logger.LogInformation("Requesting access token for scope `{Scope}`.", requestedScope);
-						accessToken = await tokenCredential.GetTokenAsync(
-							new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
-						);
-					}
+					_logger.LogInformation("Requesting access token for scope `{Scope}`.", requestedScope);
+					var accessToken = await tokenCredential.GetTokenAsync(
+						new TokenRequestContext(scopes: new string[] { scopeToRequest }) { }
+					);
 
 					
 					return accessToken.Token;
