@@ -169,8 +169,9 @@ namespace IntegratingService.Controllers
 
 			string userAssignedClientId = this.configuration["AssignedManagedIdentity"];
 			try
-			{				
-				bool isRunningLocal = !string.IsNullOrEmpty(userAssignedClientId);
+			{
+				_logger.LogInformation("Found `{UserManagedIdentityClientId}` as user assigned managed identity in the configuration.", userAssignedClientId);
+				bool isRunningLocal = string.IsNullOrEmpty(userAssignedClientId);
 
 				string scopeToRequest = string.IsNullOrEmpty(requestedScope) ? applicationIdUri + "/.default" : applicationIdUri + requestedScope;
 				if (isRunningLocal)
