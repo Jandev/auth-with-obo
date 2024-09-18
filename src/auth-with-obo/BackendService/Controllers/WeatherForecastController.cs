@@ -32,12 +32,12 @@ namespace BackendService.Controllers
 		[RequiredScope("BackendDefault")]
 		public async Task<IEnumerable<WeatherForecast>> Get()
 		{
-			var user = await _graphServiceClient.Me.Request().GetAsync();
+			string user = await GetUsername();
 			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
 			{
 				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
 				TemperatureC = Random.Shared.Next(-20, 55),
-				Summary = user.DisplayName + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
+				Summary = user + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
 			})
 			.ToArray();
 		}
@@ -46,12 +46,12 @@ namespace BackendService.Controllers
 		[RequiredScope("WeatherUser")]
 		public async Task<IEnumerable<WeatherForecast>> GetWeatherUser()
 		{
-			var user = await _graphServiceClient.Me.Request().GetAsync();
+			string user = await GetUsername();
 			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
 			{
 				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
 				TemperatureC = Random.Shared.Next(-20, 55),
-				Summary = user.DisplayName + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
+				Summary = user + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
 			})
 			.ToArray();
 		}
@@ -60,12 +60,12 @@ namespace BackendService.Controllers
 		[RequiredScope("WeatherAdmin")]
 		public async Task<IEnumerable<WeatherForecast>> GetWeatherAdmin()
 		{
-			var user = await _graphServiceClient.Me.Request().GetAsync();
+			string user = await GetUsername();
 			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
 			{
 				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
 				TemperatureC = Random.Shared.Next(-20, 55),
-				Summary = user.DisplayName + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
+				Summary = user + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
 			})
 			.ToArray();
 		}
@@ -78,12 +78,12 @@ namespace BackendService.Controllers
 		[Authorize(Roles = "Admin")]
 		public async Task<IEnumerable<WeatherForecast>> GetAdminRole()
 		{
-			var user = await _graphServiceClient.Me.Request().GetAsync();
+			string user = await GetUsername();
 			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
 			{
 				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
 				TemperatureC = Random.Shared.Next(-20, 55),
-				Summary = user.DisplayName + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
+				Summary = user + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
 			})
 			.ToArray();
 		}
@@ -92,14 +92,29 @@ namespace BackendService.Controllers
 		[Authorize(Roles = "User")]
 		public async Task<IEnumerable<WeatherForecast>> GetUserRole()
 		{
-			var user = await _graphServiceClient.Me.Request().GetAsync();
+			string user = await GetUsername();
 			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
 			{
 				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
 				TemperatureC = Random.Shared.Next(-20, 55),
-				Summary = user.DisplayName + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
+				Summary = user + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
 			})
 			.ToArray();
+		}
+
+		private async Task<string> GetUsername()
+		{
+			try
+			{
+				var user = await _graphServiceClient.Me.Request().GetAsync();
+				return user.DisplayName;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Error fetching user from Graph API.");
+				return "Unknown";
+			}
+			
 		}
 	}
 }
