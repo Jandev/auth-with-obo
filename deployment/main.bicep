@@ -20,7 +20,7 @@ param logAnalyticsWorkspaceName string = 'logAnalyticsWorkspace'
 param appInsightsName string = 'appInsights'
 
 @description('The name of the Key Vault resource')
-param keyVaultName string = 'myKeyVault'
+param keyVaultName string = 'jvobokeyvault'
 
 resource backendServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: backendServicePlanName
