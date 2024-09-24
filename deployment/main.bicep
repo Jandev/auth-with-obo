@@ -315,5 +315,6 @@ output backendServiceAppId string = backendServiceApp.id
 output integratingServiceAppId string = integratingServiceApp.id
 output logAnalyticsWorkspaceId string = logAnalyticsWorkspace.id
 output appInsightsId string = appInsights.id
+output keyVaultId string = keyVault.id
 output backendServiceIdentityId string = backendServiceIdentity.id
 output integratingServiceIdentityId string = integratingServiceIdentity.id
