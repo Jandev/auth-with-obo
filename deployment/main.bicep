@@ -165,6 +165,10 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
           value: '8ebbea06-f01e-4f94-8254-32da2e94c240'
         }
         {
+          name: 'AzureAd__ClientSecret'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=BackendServiceSecret)'
+        }
+        {
           name: 'AzureAd__CallbackPath'
           value: '/signin-oidc'
         }
@@ -207,10 +211,6 @@ resource backendServiceApp 'Microsoft.Web/sites@2022-03-01' = {
         {
           name: 'ASPNETCORE_HTTPS_PORT'
           value: '443'
-        }
-        {
-          name: 'AssignedManagedIdentity'
-          value: backendServiceIdentity.properties.clientId
         }
       ]
     }
@@ -258,7 +258,7 @@ resource integratingServiceApp 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'AzureAd__ClientSecret'
-          value: 'Client secret from app-registration. Check user secrets/azure portal.'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=IntegratingServiceSecret)'
         }
         {
           name: 'AzureAd__ClientCertificates'
