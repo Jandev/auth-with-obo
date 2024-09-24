@@ -19,6 +19,9 @@ param logAnalyticsWorkspaceName string = 'logAnalyticsWorkspace'
 @description('The name of the Application Insights resource')
 param appInsightsName string = 'appInsights'
 
+@description('The name of the Key Vault resource')
+param keyVaultName string = 'myKeyVault'
+
 resource backendServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: backendServicePlanName
   location: location
@@ -63,6 +66,60 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   properties: {
     Application_Type: 'web'
     WorkspaceResourceId: logAnalyticsWorkspace.id
+  }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2021-04-01-preview' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: subscription().tenantId
+    accessPolicies: [
+      {
+        tenantId: subscription().tenantId
+        objectId: backendServiceIdentity.properties.principalId
+        permissions: {
+          secrets: [
+            'get'
+          ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId: integratingServiceIdentity.properties.principalId
+        permissions: {
+          secrets: [
+            'get'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource integratingServiceSecret 'Microsoft.KeyVault/vaults/secrets@2021-04-01-preview' = {
+  parent: keyVault
+  name: 'IntegratingServiceSecret'
+  properties: {
+    value: 'your-integrating-service-secret'
+    attributes: {
+      enabled: false
+    }
+  }
+}
+
+resource backendServiceSecret 'Microsoft.KeyVault/vaults/secrets@2021-04-01-preview' = {
+  parent: keyVault
+  name: 'BackendServiceSecret'
+  properties: {
+    value: 'your-backend-service-secret'
+    attributes: {
+      enabled: false
+    }
   }
 }
 
