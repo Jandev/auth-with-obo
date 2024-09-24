@@ -5,6 +5,9 @@ using Microsoft.Graph;
 using System.Net.Http.Headers;
 using Azure.Identity;
 using Azure.Core;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Abstractions;
 
 namespace IntegratingService.Controllers
 {
@@ -22,15 +25,21 @@ namespace IntegratingService.Controllers
 		private readonly IConfiguration configuration;
 
 		private readonly ILogger<AllTheDataController> _logger;
+		private readonly IDownstreamApi _downstreamApi;
+		private readonly IAuthorizationHeaderProvider _authorizationHeaderProvider;
 
 		public AllTheDataController(
 			GraphServiceClient graphServiceClient,
 			IHttpClientFactory clientFactory,
 			IConfiguration configuration,
-			ILogger<AllTheDataController> logger
+			ILogger<AllTheDataController> logger,
+			IDownstreamApi downstreamApi,
+			IAuthorizationHeaderProvider authorizationHeaderProvider
 			)
 		{
 			_logger = logger;
+			this._downstreamApi = downstreamApi;
+			this._authorizationHeaderProvider = authorizationHeaderProvider;
 			_graphServiceClient = graphServiceClient;
 			this.clientFactory = clientFactory;
 			this.configuration = configuration;
@@ -86,8 +95,11 @@ namespace IntegratingService.Controllers
 		{
 			var username = await GetUserName();
 
-			var accessToken = await GenerateAccessToken(WeatherAdminScope);
+			//var accessToken = await GenerateAccessToken(WeatherUserScope);
+			var accessToken = await this._authorizationHeaderProvider.CreateAuthorizationHeaderForUserAsync(new[] { "api://8ebbea06-f01e-4f94-8254-32da2e94c240/" + WeatherUserScope, "api://8ebbea06-f01e-4f94-8254-32da2e94c240/user_impersonation" });
+			accessToken = accessToken.Replace("Bearer ", "");
 			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithUserScope/");
+			//var backendDetails = await GetBackendDetailsWithScopes(WeatherUserScope, "/WeatherForecast/WithUserScope/");
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -101,8 +113,11 @@ namespace IntegratingService.Controllers
 		{
 			var username = await GetUserName();
 
-			var accessToken = await GenerateAccessToken(WeatherUserScope);
+			// var accessToken = await GenerateAccessToken(WeatherAdminScope);
+			var accessToken = await this._authorizationHeaderProvider.CreateAuthorizationHeaderForUserAsync(new []{ "api://8ebbea06-f01e-4f94-8254-32da2e94c240/" + WeatherAdminScope, "api://8ebbea06-f01e-4f94-8254-32da2e94c240/user_impersonation" });
+			accessToken = accessToken.Replace("Bearer ", "");
 			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithAdminScope/");
+			//var backendDetails = await GetBackendDetailsWithScopes(WeatherAdminScope, "/WeatherForecast/WithAdminScope/");
 
 			var integrationServiceDetails = new IntegrationServiceCallDetails(
 				HttpContext.Request.Headers.Authorization.First()!,
@@ -151,6 +166,30 @@ namespace IntegratingService.Controllers
 				return callDetails;
 			}
 			catch (Exception ex)
+			{
+				this._logger.LogError(ex, "Failed to get response from backend API.");
+				throw;
+			}
+		}
+
+		private async Task<BackendApiCallDetails> GetBackendDetailsWithScopes(string scope, string slug)
+		{
+			string backendApiBaseUrl = this.configuration["BackendService:BaseUrl"] ?? throw new InvalidOperationException("BackendService:BaseUrl is not configured.");
+			this._logger.LogInformation("Invoking backend API at `{BackendApiBaseUrl}`.", backendApiBaseUrl);
+
+			try
+			{
+				var response = await this._downstreamApi.CallApiForUserAsync<BackendApiCallDetails>("BackendService", o =>
+				{
+					o.RelativePath = slug;
+					o.HttpMethod = HttpMethod.Get.ToString();
+					o.Scopes = new List<string>() { scope };
+				});
+
+				this._logger.LogInformation("Found response `{response}`", response);
+				return response ?? new BackendApiCallDetails("n/a", "n/a", 500, "n/a");
+			}
+			catch(Exception ex)
 			{
 				this._logger.LogError(ex, "Failed to get response from backend API.");
 				throw;
