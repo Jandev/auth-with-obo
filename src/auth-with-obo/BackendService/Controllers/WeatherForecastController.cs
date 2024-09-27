@@ -70,6 +70,35 @@ namespace BackendService.Controllers
 			.ToArray();
 		}
 
+		[HttpGet("WithAccessAsUserScope", Name = "GetWithAccessAsUserScope")]
+		[RequiredScope("access_as_user")]
+		public async Task<IEnumerable<WeatherForecast>> GetWeatherAsUser()
+		{
+			string user = await GetUsername();
+			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+			{
+				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+				TemperatureC = Random.Shared.Next(-20, 55),
+				Summary = user + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
+			})
+			.ToArray();
+		}
+
+		[HttpGet("WithAccessAsUserScopeAndAdminRole", Name = "GetWithAccessAsUserScopeAndAdminRole")]
+		[RequiredScope("access_as_user")]
+		[Authorize(Roles = "Admin")]
+		public async Task<IEnumerable<WeatherForecast>> GetWeatherAsUserScopeAndAdminRole()
+		{
+			string user = await GetUsername();
+			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+			{
+				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+				TemperatureC = Random.Shared.Next(-20, 55),
+				Summary = user + " is " + Summaries[Random.Shared.Next(Summaries.Length)]
+			})
+			.ToArray();
+		}
+
 		///////////////////////////////
 		// Authorization via Application Roles
 		///////////////////////////////

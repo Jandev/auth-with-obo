@@ -90,6 +90,38 @@ namespace IntegratingService.Controllers
 			return new ApiResponse(integrationServiceDetails, backendDetails);
 		}
 
+		[HttpGet("GetWeatherForecastWithAdminRoleAccessAsUserManagedIdentity", Name = "GetWeatherForecastWithAdminRoleAccessAsUserManagedIdentity")]
+		public async Task<ApiResponse> GetWeatherForecastWithAdminRoleAccessAsUserManagedIdentity()
+		{
+			var username = await GetUserName();
+
+			var accessToken = await GenerateAccessToken("access_as_user");
+			accessToken = accessToken.Replace("Bearer ", "");
+			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithAdminRole/");
+
+			var integrationServiceDetails = new IntegrationServiceCallDetails(
+				HttpContext.Request.Headers.Authorization.First()!,
+				username);
+
+			return new ApiResponse(integrationServiceDetails, backendDetails);
+		}
+
+		[HttpGet("GetWeatherForecastWithAdminRoleAccessAsUser", Name = "GetWeatherForecastWithAdminRoleAccessAsUser")]
+		public async Task<ApiResponse> GetWeatherForecastWithAdminRoleAccessAsUser()
+		{
+			var username = await GetUserName();
+
+			var accessToken = await this._authorizationHeaderProvider.CreateAuthorizationHeaderForUserAsync(new[] { "api://8ebbea06-f01e-4f94-8254-32da2e94c240/access_as_user" });
+			accessToken = accessToken.Replace("Bearer ", "");
+			var backendDetails = await GetBackendDetails(accessToken, "/WeatherForecast/WithAccessAsUserScope/");
+
+			var integrationServiceDetails = new IntegrationServiceCallDetails(
+				HttpContext.Request.Headers.Authorization.First()!,
+				username);
+
+			return new ApiResponse(integrationServiceDetails, backendDetails);
+		}
+
 		[HttpGet("WeatherForecastWithWeatherUserScope", Name = "GetWeatherForecastWithWeatherUserScope")]
 		public async Task<ApiResponse> GetWithUserScope()
 		{
@@ -108,7 +140,7 @@ namespace IntegratingService.Controllers
 			return new ApiResponse(integrationServiceDetails, backendDetails);
 		}
 
-		[HttpGet("WeatherForecastWithWeatherAdminScope", Name = "GetWeatherForecastWithWeatherAdminScope/")]
+		[HttpGet("WeatherForecastWithWeatherAdminScope", Name = "GetWeatherForecastWithWeatherAdminScope")]
 		public async Task<ApiResponse> GetWithAdminScope()
 		{
 			var username = await GetUserName();
