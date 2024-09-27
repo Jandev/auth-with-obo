@@ -140,7 +140,7 @@ namespace IntegratingService.Controllers
 			return new ApiResponse(integrationServiceDetails, backendDetails);
 		}
 
-		[HttpGet("WeatherForecastWithWeatherAdminScope", Name = "GetWeatherForecastWithWeatherAdminScope")]
+		[HttpGet("WeatherForecastWithWeatherAdminScope", Name = "GetWeatherForecastWithWeatherAdminScope/")]
 		public async Task<ApiResponse> GetWithAdminScope()
 		{
 			var username = await GetUserName();
